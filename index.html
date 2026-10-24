@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DF Box Tracker (Smart Gas)</title>
+    <style>
+        :root { 
+            --red-grad: linear-gradient(135deg, #e53935 0%, #b71c1c 100%);
+            --white: #ffffff; 
+            --theme-bg: #f3f4f8;
+            --theme-card: #ffffff;
+            --theme-input: #f8fafc;
+            --theme-text: #1e293b;
+            --theme-text-sec: #64748b;
+            --theme-border: #e2e8f0;
+            --theme-checkbox-bg: #fff5f5;
+            --theme-checkbox-border: #ffcdd2;
+            --theme-checkbox-text: #c62828;
+            --theme-partial-bg: #fffcf8;
+            --theme-partial-border: #f59e0b;
+            --theme-warn-bg: #fffbeb;
+            --theme-warn-border: #fde68a;
+            --theme-warn-text: #b45309;
+            --badge-full-bg: #fee2e2;
+            --badge-full-text: #b91c1c;
+            --badge-partial-bg: #fef3c7;
+            --badge-partial-text: #b45309;
+            --badge-cold-bg: #eff6ff;
+            --badge-cold-text: #2563eb;
+            --badge-cold-border: #bfdbfe;
+            --badge-hot-bg: #fffbeb;
+            --badge-hot-text: #d97706;
+            --badge-hot-border: #fde68a;
+            --badge-ac-bg: #e0f2fe;
+            --badge-ac-text: #0369a1;
+            --badge-dc-bg: #fce7f3;
+            --badge-dc-text: #be185d;
+            --theme-card-border: rgba(255,255,255,0.8);
+            --chart-grid: #e0e0e0;
+            --chart-point-stroke: #ffffff;
+            --shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06);
+            --red-shadow: 0 8px 20px rgba(229, 57, 53, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --theme-bg: #121212;
+            --theme-card: #1e1e1e;
+            --theme-input: #262626;
+            --theme-text: #e4e6eb;
+            --theme-text-sec: #9ca3af;
+            --theme-border: #333333;
+            --theme-checkbox-bg: #2d1618;
+            --theme-checkbox-border: #5c2327;
+            --theme-checkbox-text: #ff8a80;
+            --theme-partial-bg: #292116;
+            --theme-partial-border: #594222;
+            --theme-warn-bg: #292116;
+            --theme-warn-border: #594222;
+            --theme-warn-text: #f59e0b;
+            --badge-full-bg: rgba(239, 68, 68, 0.2);
+            --badge-full-text: #f87171;
+            --badge-partial-bg: rgba(245, 158, 11, 0.2);
+            --badge-partial-text: #fbbf24;
+            --badge-cold-bg: rgba(59, 130, 246, 0.2);
+            --badge-cold-text: #60a5fa;
+            --badge-cold-border: rgba(59, 130, 246, 0.4);
+            --badge-hot-bg: rgba(217, 119, 6, 0.2);
+            --badge-hot-text: #fbbf24;
+            --badge-hot-border: rgba(217, 119, 6, 0.4);
+            --badge-ac-bg: rgba(14, 165, 233, 0.2);
+            --badge-ac-text: #38bdf8;
+            --badge-dc-bg: rgba(236, 72, 153, 0.2);
+            --badge-dc-text: #f472b6;
+            --theme-card-border: rgba(255,255,255,0.05);
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            --chart-grid: #333333;
+            --chart-point-stroke: #1e1e1e;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; background-color: var(--theme-bg); color: var(--theme-text); padding-bottom: 40px; max-width: 100vw; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        
+        .header { background: var(--red-grad); color: var(--white); padding: 32px 20px 28px; text-align: center; border-bottom-left-radius: 32px; border-bottom-right-radius: 32px; box-shadow: var(--red-shadow); margin-bottom: 25px; position: relative; overflow: hidden; }
+        .header h1 { margin: 0; font-size: 1.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; position: relative; z-index: 1;}
+        .header p { margin: 8px 0 0 0; font-size: 0.9rem; opacity: 0.9; font-weight: 500; letter-spacing: 0.5px; position: relative; z-index: 1;}
+        
+        .container { padding: 0 15px; max-width: 500px; margin: 0 auto; }
+        .card { background: var(--theme-card); border-radius: 22px; padding: 25px 20px; box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--theme-card-border); transition: background-color 0.3s, border-color 0.3s; }
+        
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--theme-text-sec); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="number"] { width: 100%; border: 1px solid var(--theme-border); padding: 14px 16px; border-radius: 12px; font-size: 1.1rem; outline: none; transition: all 0.3s ease; background: var(--theme-input); color: var(--theme-text); }
+        input[type="number"]:focus { border-color: #e53935; background: var(--theme-card); box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.1); }
+        input.error { border-color: #e53935 !important; animation: shake 0.3s ease; }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .checkbox-wrapper { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; padding: 15px; background: var(--theme-checkbox-bg); border: 1px solid var(--theme-checkbox-border); border-radius: 12px; cursor: pointer; transition: background-color 0.3s, border-color 0.3s; }
+        .checkbox-wrapper input { margin-right: 12px; width: 22px; height: 22px; accent-color: #e53935; cursor: pointer; }
+        .checkbox-wrapper span { margin-bottom: 0; font-size: 0.95rem; font-weight: 800; color: var(--theme-checkbox-text); cursor: pointer; text-transform: none; letter-spacing: normal; transition: color 0.3s; }
+
+        .btn { display: block; width: 100%; background: var(--red-grad); color: var(--white); border: none; padding: 16px; font-size: 1.1rem; font-weight: bold; border-radius: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: var(--red-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .btn:active { transform: scale(0.985) translateY(1px); box-shadow: 0 4px 10px rgba(229, 57, 53, 0.2); }
+        
+        .btn-toggle { background: transparent; color: var(--theme-text-sec); border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.85rem; border: none; flex: 1; padding: 10px; transition: background 0.2s, color 0.2s; }
+        .btn-toggle.active { background: var(--red-grad); color: white; box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25); }
+
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .dash-card { color: var(--white); border-radius: 22px; padding: 22px 14px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 125px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+        .dash-card::after { content: attr(data-icon); position: absolute; right: 10px; bottom: 4px; font-size: 4.5rem; opacity: 0.18; pointer-events: none; font-weight: 900; }
+        .dash-card.cons-card { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35); }
+        .dash-card.range-card { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35); }
+        .dash-card.price-card { background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.35); }
+        .dash-card.savings { background: linear-gradient(135deg, #10b981 0%, #047857 100%); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35); }
+        .dash-card .value { font-size: 1.5rem; font-weight: 800; margin: 8px 0; }
+        .dash-card .label { font-size: 0.7rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; line-height: 1.3; }
+        
+        .global-stats { display: flex; justify-content: space-between; text-align: center; margin: 20px 0; padding: 15px; background: var(--theme-input); border-radius: 16px; border: 1px solid var(--theme-border); transition: background-color 0.3s, border-color 0.3s; }
+        .gs-item { flex: 1; }
+        .gs-item:not(:last-child) { border-right: 1px solid var(--theme-border); }
+        .gs-title { font-size: 0.7rem; color: var(--theme-text-sec); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        .gs-val { font-size: 1.1rem; font-weight: 800; color: var(--theme-text); }
+        .gs-val.red { color: #e53935; }
+        
+        .history-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; color: var(--theme-text); padding-left: 5px; }
+        
+        .history-item { background: var(--theme-card); border-left: 6px solid #e53935; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); position: relative; border: 1px solid var(--theme-card-border); transition: background-color 0.3s, border-color 0.3s; }
+        .history-item.partial { border-left-color: var(--theme-partial-border); background: var(--theme-partial-bg); }
+        .hi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+        .hi-badges-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .hi-date { font-size: 0.8rem; color: var(--theme-text-sec); font-weight: 500; }
+        
+        .hi-badge { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 8px; display: inline-flex; align-items: center; }
+        .badge-full { background: var(--badge-full-bg); color: var(--badge-full-text); }
+        .badge-partial { background: var(--badge-partial-bg); color: var(--badge-partial-text); }
+        .badge-temp-cold { background: var(--badge-cold-bg); color: var(--badge-cold-text); border: 1px solid var(--badge-cold-border); }
+        .badge-temp-hot { background: var(--badge-hot-bg); color: var(--badge-hot-text); border: 1px solid var(--badge-hot-border); }
+        .badge-ac { background: var(--badge-ac-bg); color: var(--badge-ac-text); }
+        .badge-dc { background: var(--badge-dc-bg); color: var(--badge-dc-text); }
+        
+        .action-btns { display: flex; gap: 6px; margin-left: auto; align-items: center; }
+        .btn-action-row { background: var(--theme-input); border: none; color: var(--theme-text-sec); font-size: 0.9rem; cursor: pointer; border-radius: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-action-row:hover { background: #fee2e2; color: #ef4444; }
+        .btn-action-row.edit:hover { background: #dbeafe; color: #2563eb; }
+        
+        .hi-main { display: flex; justify-content: space-between; align-items: flex-end; }
+        .hi-odo { font-weight: 800; font-size: 1.2rem; color: var(--theme-text); }
+        .hi-right { text-align: right; display: flex; flex-direction: column; gap: 6px; }
+        .hi-kwh { font-weight: 800; color: #e53935; font-size: 1.2rem; }
+        .partial .hi-kwh { color: var(--theme-warn-text); }
+        .hi-cost { font-size: 0.9rem; color: var(--theme-text-sec); font-weight: 600; }
+        
+        .cycle-stats { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--theme-border); font-size: 0.85rem; color: var(--theme-text); display: flex; justify-content: space-between; transition: border-color 0.3s; }
+        .cycle-stats span { font-weight: 800; color: #ef4444; }
+        .cycle-stats .cost-muted { font-weight: 600; color: var(--theme-text-sec); font-size: 0.8rem; }
+        
+        .btn-clear { background: transparent; color: var(--theme-text-sec); border: 2px solid var(--theme-border); box-shadow: none; margin-top: 35px; transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
+        .btn-clear:hover, .btn-clear:active { background: var(--theme-input); border-color: var(--theme-text-sec); }
+        
+        #toast { visibility: hidden; min-width: 250px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 50px; padding: 16px 20px; position: fixed; z-index: 1000; left: 50%; bottom: -50px; transform: translateX(-50%); font-weight: 600; font-size: 0.95rem; opacity: 0; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 25px rgba(0,0,0,0.2); pointer-events: none;}
+        #toast.show { visibility: visible; opacity: 1; bottom: 24px; }
+        
+        #chartContainer { width: 100%; height: 180px; background: var(--theme-input); border-radius: 12px; border: 1px solid var(--theme-border); overflow-x: auto; padding: 10px 0; box-sizing: border-box; transition: background-color 0.3s, border-color 0.3s; }
+        
+        .download-box { background: var(--theme-card); border-radius: 22px; padding: 20px; text-align: center; box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--theme-card-border); }
+        .download-box button { background: #2563eb; color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .download-box button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button id="themeToggle" onclick="toggleTheme()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2); border:none; color:white; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.2rem; z-index:10; display:flex; align-items:center; justify-content:center; transition: background 0.3s;">☀️</button>
+        <h1>DF Box</h1>
+        <p>Одной рукой еду, второй слёзы счастья вытираю.</p>
+    </div>
+    
+    <div class="container">
+        <!-- КНОПКА СКАЧИВАНИЯ ФАЙЛА (всегда видна, скрывается при клике) -->
+        <div class="download-box" id="downloadBanner" style="display: none;">
+            <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--theme-text);">Сохранить или обновить приложение на телефоне:</div>
+            <button type="button" onclick="downloadHtmlFile()">💾 Скачать свежий .HTML файл</button>
+        </div>
+
+        <div class="card">
+            <div id="formTitle" style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; color: var(--theme-text);">Новая зарядка</div>
+            <input type="hidden" id="editingId" value="">
+
+            <div class="input-group">
+                <label>Одометр сейчас (км):</label>
+                <input type="number" id="odometer" step="1" inputmode="numeric" placeholder="Например: 15400">
+            </div>
+            <div class="input-group">
+                <label>Залито киловатт (кВт·ч):</label>
+                <input type="number" id="energy" step="0.1" inputmode="decimal" placeholder="Например: 12.5">
+            </div>
+            <div class="input-group">
+                <label>Цена за 1 кВт·ч (BYN):</label>
+                <input type="number" id="priceKwh" step="0.01" inputmode="decimal" value="0.25" onchange="checkPriceForDC()">
+            </div>
+            
+            <div class="input-group" style="background:var(--theme-input); padding:12px; border-radius:12px; border:1px solid var(--theme-border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                    <label style="margin-bottom:0;">Температура на улице (°C):</label>
+                    <div style="font-size:0.75rem; color:#3b82f6; cursor:pointer; font-weight:bold;" onclick="fetchWeather()">🔄 Авто <span id="weatherStatus" style="color:var(--theme-text-sec); font-weight:normal;">(IP: 9.9°C)</span></div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="temp" step="1" placeholder="Например: -5" oninput="onTempChange()" style="background:var(--theme-card); flex: 1;">
+                    <button type="button" onclick="toggleTempSign()" style="background: var(--theme-card); border: 1px solid var(--theme-border); color: var(--theme-text); font-weight: bold; border-radius: 10px; width: 44px; font-size: 1.1rem; cursor: pointer;">±</button>
+                </div>
+            </div>
+            
+            <div class="input-group" style="display:flex; justify-content:space-between; background:var(--theme-input); padding:4px; border-radius:12px; border:1px solid var(--theme-border);">
+                <button type="button" id="btnAC" class="btn-toggle active" onclick="manualSetChargeType('AC')">AC (Потери 12%)</button>
+                <button type="button" id="btnDC" class="btn-toggle" onclick="manualSetChargeType('DC')">DC (Потери 4%)</button>
+            </div>
+            <input type="hidden" id="chargeType" value="AC">
+
+            <label class="checkbox-wrapper">
+                <input type="checkbox" id="isFullCharge" checked="">
+                <span>Зарядил батарею до 100%</span>
+            </label>
+            
+            <button class="btn" id="saveBtn" onclick="saveRecord()">Сохранить зарядку</button>
+            <button class="btn" id="cancelEditBtn" onclick="cancelEdit()" style="display:none; background: transparent; color: var(--theme-text-sec); border: 2px solid var(--theme-border); box-shadow: none; margin-top: 10px;">Отменить редактирование</button>
+            <div id="frostWarningBanner" style="display: none; margin-top: 12px; font-size: 0.8rem; font-weight: bold; color: var(--theme-warn-text); background: var(--theme-warn-bg); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--theme-warn-border);">❄️ Внимание: при текущей температуре прогнозируется снижение запаса хода из-за работы печки и холодной батареи.</div>
+        </div>
+
+        <div class="filter-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding: 0 5px;">
+            <div style="font-size:1.2rem; font-weight:800; color:var(--theme-text);">Статистика</div>
+            <select id="periodFilter" onchange="renderData()" style="padding: 8px 12px; border-radius: 10px; border: 1px solid var(--theme-border); font-size: 0.9rem; font-weight: 700; color: var(--theme-text); background: var(--theme-card); outline: none; box-shadow: var(--shadow); cursor: pointer;">
+                <option value="all">За всё время</option>
+                <option value="month">Этот месяц</option>
+                <option value="week">Эта неделя</option>
+                <option value="year">Этот год</option>
+            </select>
+        </div>
+
+        <div id="statsBlock" class="dashboard" style="display:none;">
+            <div class="dash-card cons-card" data-icon="⚡" title="Считается только между зарядками до 100%">
+                <div class="label">Средний<br>расход</div>
+                <div class="value" id="avgCons">0.0 <span style="font-size:0.5em; opacity:0.8;">кВт·ч</span></div>
+            </div>
+            <div class="dash-card range-card" data-icon="🔋" title="С учетом потерь на зарядку">
+                <div class="label">Реальный<br>запас (100%)</div>
+                <div class="value" id="realRange">0 <span style="font-size:0.5em; opacity:0.8;">км</span></div>
+            </div>
+            <div class="dash-card price-card" data-icon="💰">
+                <div class="label">Средняя цена<br>100 км</div>
+                <div class="value" id="avgCost">0.00 <span style="font-size:0.5em; opacity:0.8;">BYN</span></div>
+            </div>
+            <div class="dash-card savings" data-icon="📉">
+                <div class="label">Сэкономлено<br>(отн. ДВС)</div>
